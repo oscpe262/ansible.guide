@@ -1,0 +1,65 @@
+I det här avsnittet ska vi titta på de vanligaste konfigurationsfilerna samt viss filstruktur i det upplägg vi senare kommer att beröra i \ref{sec:bestpractices} Best practices.
+\section{/etc/ansible}
+Under \texttt{/etc/ansible} finner vi systemkonfiguration för styrsystemet samt globalt tillgängliga inventories, roles etc. Vi kommer dock inte att använda mer än \texttt{ansible.cfg} och \texttt{hosts} på en global nivå.
+\subsection{ansible.cfg}
+Generellt behöver inte den här filen modifieras, men det finns vissa saker som kan vara av intresse även på
+en nybörjarnivå.
+
+\texttt{remote\_user} ger oss möjligheten att ansluta med en specifik användare. Vi kommer att beröra detta mer
+under best practices.
+
+\texttt{log\_path} kan vara bra att sätta till en lämplig sökväg (ex. \texttt{/var/log/ansible.log}) för att aktivera loggning..
+
+\texttt{vault\_password\_file} ger möjligheten att ange en sökväg för en så kallad 'vault file' - en krypterad fil 
+där man kan spara variabler man inte vill ha liggande för allmän åskådan. En sådan fil kan även åkallas på commandline med \texttt{--vault-password-file}.
+
+\texttt{ansible\_managed} är en variabel med samma namn. Denna brukar användas i konfigurationsfiler för att
+markera att dessa är konfigurationsstyrda och således inte bör ändras direkt på systemet då dessa ändringar förr 
+eller senare kommer att skrivas över.
+
+\texttt{nocows} styr kor. Rekommenderas att sätta till '1' om man inte hyser bovina läggningar.
+
+\subsection{hosts}
+\texttt{/etc/ansible/hosts} är den globala host-listan (inventory). Man kan (och eventuellt bör, beroende på miljön i helhet) använda separata hosts-filer och åkalla dessa på kommandoraden.
+
+Inventories är vanligen skrivna i ett init-liknande format, men kan i senare versioner av Ansible även
+vara i YAML-format. Vi kommer här att använda det klassiska. Vi kommer att ta vårat exempel från TDDI41 för att
+visa hur en sådan kan se ut.
+
+Det vi ser är en enkel enumrering av noderna där vi ger dem funktionella grupperingar (första blocket) där vi
+kopplar ihop IP-adresser till dessa grupperingar. Vi skulle lika gärna kunna använda domännamn bör dock sägas, och
+skulle vi ha ännu fler noder skulle vi kunna fortsätta lista dessa under grupperingarna. För att demonstrera detta
+listar vi även ett subset inaktiva (utkommenterade) clients som inte är aktuella än.
+
+Värt att notera är även att vi kan använda ranges (:). I det här fallet har vi gett ett spann IP-adresser, men skulle vi ha använt oss utav domännamn skulle vi även ha kunnat använda oss av ranges i dessa, exempelvis \texttt{client-[1:2]}
+
+\lstset{language=sh}
+\begin{lstlisting}[frame=single]
+### BOF ###
+## /etc/ansible/hosts
+#
+## Enumerating nodes
+
+[gateway]
+192.168.0.1
+
+[server]
+192.168.0.2
+
+[clients]
+192.168.0.[3:4]
+#192.168.1.[1:50]
+
+## Groupings
+
+[internal:children]
+gateway
+server
+clients
+
+[authnodes:children]
+server
+clients
+### EOF ###
+\end{lstlisting}
+

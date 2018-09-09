@@ -1,0 +1,60 @@
+``Best practice'' är ett begrepp som alla har en bild utav vad det innebär inom ens eget område.
+Tyvärr är det i stort sett aldrig är så att det finns en enhetlig bild inom varje område, sällan ens
+på varje arbetsplats, eller ens mellan team på samma arbetsplats.
+
+När det gäller systemadministration så är det givetvis likadant, och det viktigaste är i sedvanlig ordning dokumentation.
+Har man en god dokumentation så kan resten lösas med resurser. Ansible är inte avsett att vara ett dokumentationsverktyg,
+men det kan utgöra ett utmärkt komplement till exempelvis en wiki.
+
+Men, det här är inte en guide till systemadministration eller dokumentation, det är en guide till Ansible, så låt 
+oss fokusera på detta.
+
+Best practice är till viss del beroende på hur vad man använder Ansible till och hur stora och varierade miljöer
+man har. Den här guiden försöker främst hålla ett scenario tanken där vi har en varierad miljö med olika 
+linuxdistributioner och där vi samtidigt söker en skalbarhet. Att hantera en eller ett par maskiner klarar man utan
+att blanda in exempelvis Ansible (även om det är praktiskt att kunna rulla om maskiner smidigt), men att hålla
+tiotals, hundratals, eller till och med tusentals klienter i ordning på ett enhetligt sätt kräver verktyg, och varje
+miljö börjar med en första maskin.
+
+Att använda någon form av versionshantering är att se som lite av ett måste när samarbete mellan administratörer
+förekommer, och även en automatiseringskedja när miljön växer. Det är dock två faktorer vi inte kommer att beröra
+här då det är utanför denna guides ``scope'', men möjligheterna finns.
+
+\section{Filstruktur}
+En tydlig filstruktur hjälper skalbarhet, läsbarhet och även implementation av versionshantering (ex. Git). Det 
+finns flera olika modeller som är bra, men här lyfts bara en av den enkla anledningen att det är en modell 
+undertecknad själv har använt framgångsrikt och för att omfattningen av denna guide skall hållas begränsad. Den 
+är en av de modeller som rekommenderas av RedHat, så det är inget hemkok på något sätt. Vi börjar med att illustrera
+den:
+
+\begin{verbatim}
+./
+  hosts                   # global inventory file
+  
+  group_vars/
+    <groupname>           # variables for groups
+  host_vars/
+    <hostname>            # variables for specific systems
+  
+  library/                # custom modules
+  filter_plugins/         # custom filter plugins
+  
+  roles/                  
+    common/               # this hierarchy represents a "role"
+        tasks/            #
+            main.yml      #  <-- tasks file can include smaller files if warranted
+        handlers/         #
+            main.yml      #  <-- handlers file
+        templates/        #  <-- files for use with the template resource
+            ntp.conf.j2   #  <------- templates end in .j2
+        files/            #
+            bar.txt       #  <-- files for use with the copy resource
+            foo.sh        #  <-- script files for use with the script resource
+        vars/             #
+            main.yml      #  <-- variables associated with this role
+        defaults/         #
+            main.yml      #  <-- default lower priority variables for this role
+        meta/             #
+            main.yml      #  <-- role dependencies
+
+\end{verbatim}

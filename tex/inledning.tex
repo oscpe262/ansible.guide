@@ -6,7 +6,7 @@ alternativt har du hittat det själv och eventuellt undrar du varför du ska for
 
 Den här guiden är inte avsedd att vara en komplett dokumentation för Ansible -- det vore redundant, vilket förvisso är bra, men det skulle innebära att jag skulle behöva hålla den uppdaterad frekvent.
 Inte heller kommer Ansible att hjälpa dig tidsmässigt att konfigurera ett enskilt system. Ju färre system och ju mer sällan de konfigureras, desto mindre nytta har du av Ansible.
-Men, Ansible är ett utmärkt verktyg för att komma in i "sysadmintänket" (gör inte två gånger det du kan scripta) utan att behöva lära sig shellscript eller Python. Givetvis är det bra att kunna dessa också, men det är tidsödande
+Men, Ansible är ett utmärkt verktyg för att komma in i ``sysadmintänket'' (gör inte två gånger det du kan scripta) utan att behöva lära sig shellscript eller Python. Givetvis är det bra att kunna dessa också, men det är tidsödande
 om man huvudsakligen ska konfigurera vardagliga saker.
 Den här guiden är främst utvecklad med avseende på kursen TDDI41 vid LiU, och kommer även att använda enskilda delar av kursen som exempel, även om jag kommer att hålla mig ifrån att använda fullständiga exempel.
 Trots allt så tenderar man att lära sig mest av att sitta och laborera med det själv.
@@ -14,7 +14,7 @@ Trots allt så tenderar man att lära sig mest av att sitta och laborera med det
 Om det är något du vill göra men som inte täcks här eller i boken oven, googla eller vänd dig till något lämpligt forum på webben. 
 Det den här guiden syftar till är att snabbt få upp nya användare till en nivå där de kan börja använda Ansible för att lösa labbuppgifterna.
 
-Om du springer på något som du känner borde ha tagits upp och som faller inom dokumentets syfte, kontakta mig gärna på guidens gitrepo \href{http://github.com/oscpe262/latexguide}{\url{http://github.com/oscpe262/latexguide}} och berätta.
+Om du springer på något som du känner borde ha tagits upp och som faller inom dokumentets syfte, kontakta mig gärna på guidens gitrepo \href{http://github.com/oscpe262/ansible.guide}{\url{http://github.com/oscpe262/ansible.guide}} och berätta.
 
 \subsubsection{Hur ska jag läsa det här dokumentet?}
 Det står läsaren givetvis fritt att läsa det precis som denne själv önskar. Ett varningens finger bör dock lyftas till den som ämnar hoppa runt i texten då vissa avsnitt bygger på tidigare avsnitt
@@ -26,7 +26,7 @@ Jag läste kursen hösten 2016, ett år innan jag började jobba som systemadmin
 Rent innehållsmässigt bjöds det på många bra delar, men även en hel del utdaterade, vilket var bra när man kom ut i verkligheten med en massa förlegade system. Sällan kunde jag ana att det första jag 
 skulle få användning utav var NIS-erfarenhet ...
 
-Nåja, vad som var bristande med kursen var dock vad jag kallar "sysadmintänk". Det första som rekommenderades var att göra alla labbar manuellt först, den sista obligatoriska labben var att scripta allt och skriva tester,
+Nåja, vad som var bristande med kursen var dock vad jag kallar ``sysadmintänk''. Det första som rekommenderades var att göra alla labbar manuellt först, den sista obligatoriska labben var att scripta allt och skriva tester,
 och sedan göra om allt med exempelvis Puppet, Ansible eller dylikt för ett högre betyg. Dumt tänkt!
 
 Skulle jag ha lagt upp det så skulle jag ha gjort tvärt om -- använd ett sådant verktyg först, för det är vad du vill använda i verkliga livet om du sysslar med just 'systemadministration'.
