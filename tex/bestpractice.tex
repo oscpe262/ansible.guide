@@ -39,6 +39,9 @@ den:
   library/                # custom modules
   filter_plugins/         # custom filter plugins
   
+  playbooks/              # directory for playbooks
+    playbook1.yml
+
   roles/                  
     common/               # this hierarchy represents a "role"
         tasks/            #
@@ -58,3 +61,21 @@ den:
             main.yml      #  <-- role dependencies
 
 \end{verbatim}
+
+Inventory-filer har vi redan berört, och generellt bör endast en sådan finnas och hållas så läsbar som möjligt.
+Det är även i inventoryt som grupperingar av maskinfunktioner bör ske på ett vettigt sätt.
+
+\texttt{library} samt \texttt{filter\_plugins} är för egenskrivna moduler och plugins. 
+Det är inget vi kommer att beröra här dock.
+
+\texttt{group\_vars} och \texttt{host\_vars} innehåller variabelfiler för nodgrupper och enskilda noder.
+Här bör vi tänka på att vi vill lägga så mycket specifik konfiguration av enskilda maskiner/grupper här. 
+
+\texttt{roles} är vad vi skulle kunna likna vid programmeringsfunktioner och strukturer. Roller bör vara så
+generellt skrivna som möjligt, utan nod-specifika variabler, idempotenta, begränsade i dess funktion och 
+om möjligt oberoende av distribution (eller med stöd för alla berörda distributioner).
+
+\texttt{playbooks} är den mapp där vi generellt lagrar de playbooks vi skriver. En playbook kan vara hur begränsad
+eller omfattande man önskar, men generellt bör de vara begränsade antingen i funktion eller gruppering av noder.
+Kan man inte på mindre än en minut få en god överblick över vad en playbook gör bör man fundera på hur man kan
+bryta ner den i mindre.
