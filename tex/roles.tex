@@ -1,0 +1,84 @@
+% TODO: I playbooks - lägg till import av andra playbooks
+Roles -- roller -- är egentligen inte mycket annat än playbooks som inte är hostbundna; m.a.o. en template.
+
+Som den uppmärksamme såg tidigare bygger en role på en katalogstruktur där den enda obligatoriska katalogen och 
+filen är \texttt{./roles/rolename/tasks/main.yml}. Den filen är i princip en reducerad playbook där vi brutit ut
+tasks till en separat fil. Har vi handlers bryter vi ut dem till \texttt{handlers/main.yml}.
+
+Att följa given katalogstruktur gör även att Ansible själv hittar exempelvis handlers, variabler etc.
+
+\section{Variabler i roles}
+Variabler i roller kan användas i flera lager med olika prioritet. Lägst prioritet har variabler i 
+\texttt{defaults/main.yml}. Dessa kan i sin tur skrivas över av importerade variabler. Fördelen med att ha 
+defaults är givetvis att vi inte kommer få problem vid körning på grund av att en variabel inte är deklarerad.
+Således bör alla egna variabler vara deklarerade i \texttt{defaults/main.yml}.
+
+Exempelvis skulle våran tidigare NTP-playbook kunna vara en roll som ser ut som följande i role-form med paketnamnet som variabel (vilket är overkill för TDDI41, men vilket vore smidigt i en distromixad miljö):
+
+\begin{verbatim}
+### ./roles/ntp/tasks/main.yml ###
+---
+- name: "Ensure NTP package is installed"
+  package:
+    name: '{{ ntp_package }}'
+    state: present
+  tags: NTP
+  notify:
+    - restart ntp
+...
+
+### ./roles/ntp/handlers/main.yml ###
+---
+- name: restart ntp
+  service:
+    name: ntpd
+    state: restarted
+  tags: NTP
+...
+
+### ./roles/ntp/defaults/main.yml ###
+---
+ntp_package: ntp
+ntp_server: false
+...
+\end{verbatim}
+
+\section{Filöverföring}
+Att föra över filer från styrhost till nod är inte det vanligaste, men det kan behöva göras emellanåt. Filer
+lagrade under \texttt{files} är lättrefererade eftersom Ansible kommer att söka där först och främst.
+Främst används dessa av \texttt{copy}-modulen vilken vi inte kommer att beröra här, men återigen är Ansibles
+dokumentation lättfunnen.
+
+Vad som är mer intressant är \texttt{templates} där vi kan lagra konfigurationsfilsmallar (vilket vi kommer att 
+beröra). Detta är mallar som kan vara scriptade för att dynamiskt kunna anpassa sig utifrån variabler (antingen
+insamlade från noden, eller inskickade vid körning) och på så sätt på ett smidigt sätt konfigurera en host.
+
+\section{Roles i playbooks}
+För att använda roles måste vi koppla dessa till noder i en playbook. Den uppmärksamme lade även märke till
+variabeln \texttt{ntp\_server} ovan. Vi kommer senare att visa hur denna kan användas i en template för att
+låta en fil konfigurera både en ntp-server och ntp-klienter. Vi förutsätter dock här att det redan är med i 
+tasks-listan och att templaten är på plats, när vi nu visar på hur en playbook som nyttjar detta kan se ut:
+
+\begin{verbatim}
+### ./playbook.yml
+---
+- hosts: gateway
+  become: yes
+  roles:
+    - { role: ntp, tags: ["NTP","gateway"], ntp_server: true }
+
+# Här ser vi en alternativ formattering som är motsvarande den ovan. 
+# Vilken man vill använda är en smaksak.
+
+- hosts: authnodes
+  become: yes
+  roles:
+    - role: ntp
+      tags: NTP,authnodes
+      ntp_server: false
+\end{verbatim}
+
+Den uppmärksamme har säkerligen även ifrågasatt varför vi har med \texttt{ntp\_server: false} när den är deklarerad
+som \texttt{false} i \texttt{defaults/main.yml}. Det är en god iakttagelse, och den enda anledningen är för att 
+visa på de olika formatteringarna. Det skadar givetvis inte att skicka med den, och det skulle kunna vara att 
+rekommendera utifall att vi av någon anledning skulle få för oss att ändra default-värdet vid senare tillfälle.

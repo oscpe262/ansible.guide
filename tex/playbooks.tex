@@ -92,3 +92,18 @@ grundläggande körexempel tidigare ger vi vår playbook taggen NTP:
 \end{verbatim}
 
 Varje task kan ges flera taggar i en kommaseparerad lista (OR:ad, så en räcker för att aktivera).
+
+\section{Importera task lists och variabelfiler}
+Ansible tillåter playbooks och task lists att importera andra filer med task lists som kommer att köras in-line. Detta kan
+vara smidigt inte minst i roles som ska stödja olika distributioner som kräver olika steg från varandra. Likaså
+kan separata filer med variabler.
+
+Dessa två actions är:
+\texttt{include\_tasks} och \texttt{include\_vars}. Även \texttt{import\_tasks} och \texttt{import\_vars} kan
+användas, med skillnaden att \texttt{import*} preprocessas när playbooken parsas, medan \texttt{include*} processas
+när de stöts på under körningen.
+
+\section{Variabler}
+Variabler är det som gör Ansible till mer än bara en exekverare av statiska skript.
+Variabelnamn startar med en bokstav och kan innehålla [A-Za-z0-9\_]. Märk väl att bindestreck inte är tillåtna.
+Variabler är inte helt triviala, och jag rekommenderar starkt att läsa \href{https://docs.ansible.com/ansible/2.6/user_guide/playbooks_variables.html}{\em Ansibles dokumentation} i ämnet. Fortsatt kommer det här dokumentet att förutsätta att läsaren själv slår upp denna dokumentation när tveksamhet råder.
