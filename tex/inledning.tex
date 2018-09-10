@@ -14,6 +14,10 @@ Trots allt så tenderar man att lära sig mest av att sitta och laborera med det
 Om det är något du vill göra men som inte täcks här eller i boken oven, googla eller vänd dig till något lämpligt forum på webben. 
 Det den här guiden syftar till är att snabbt få upp nya användare till en nivå där de kan börja använda Ansible för att lösa labbuppgifterna.
 
+Jag kommer att använda mig en hel del av svengelska, något som är svårfrånkomligt i den här branschen. Där det finns
+otvetydiga och etablerade begrepp på svenska kommer jag att försöka hålla mig till dessa, men jag kommer inte att
+tvinga fram översättningar som gör att läsaren inte kommer att känna igen termen när denne stöter på den i engelsk dokumentation.
+
 Om du springer på något som du känner borde ha tagits upp och som faller inom dokumentets syfte, kontakta mig gärna på guidens gitrepo \href{http://github.com/oscpe262/ansible.guide}{\url{http://github.com/oscpe262/ansible.guide}} och berätta.
 
 \subsubsection{Hur ska jag läsa det här dokumentet?}
@@ -29,8 +33,15 @@ skulle få användning utav var NIS-erfarenhet ...
 Nåja, vad som var bristande med kursen var dock vad jag kallar ``sysadmintänk''. Det första som rekommenderades var att göra alla labbar manuellt först, den sista obligatoriska labben var att scripta allt och skriva tester,
 och sedan göra om allt med exempelvis Puppet, Ansible eller dylikt för ett högre betyg. Dumt tänkt!
 
-Skulle jag ha lagt upp det så skulle jag ha gjort tvärt om -- använd ett sådant verktyg först, för det är vad du vill använda i verkliga livet om du sysslar med just 'systemadministration'.
-Ur det perspektivet är Ansible ett utmärkt verktyg, just för att det inte gör jobbet åt dig -- du måste förstå vad som ska göras -- men det besparar dig en massa scriptande.
+Skulle jag ha lagt upp det så skulle jag ha gjort tvärt om -- använd ett sådant verktyg först, för det är vad du vill använda i verkliga livet om du sysslar med just 'systemadministration'. Jag har full förståelse att många av 
+kursdeltagarna aldrig själva konfigurerat ett linuxsystem, och en bråkdel av de som har har säkerligen inte gjort
+hälften av det kursen berör. Därmed blir det en konflikt mellan vad kursen lär ut och vad kursen påstår sig lära ut.
+Ska kursen handla om systemadministration, eller ska den handla om linuxfärdigheter? För mig som använt Linux som
+primärt operativsystem i fyra år var det framför allt sysadmindelen som var av intresse, och arbetsmetoderna som
+sysadmin är relativt lika oavsett vilka operativsystem man driftar. Men, givetvis krävs det att man har viss kunskap
+om hur aktuella operativsystem fungerar om man ska kunna drifta dem, vilket alla kursdeltagare inte har.
+Ur det perspektivet är Ansible ett utmärkt verktyg, just för att det inte gör jobbet åt dig -- du måste fortfarande
+lära dig och förstå vad som ska göras -- men det besparar dig en massa scriptande.
 
 \subsection{Vad är Ansible?}
 Ansible är en öppen mjukvara för automatisering av bland annat mjukvaruprovisionering och konfigurationsstyrning. Ansible ansluter via SSH (eller PowerShell, eller andra API:er, men jag lägger här fokus vid styrning från och till linuxmaskiner) till en eller flera noder -- seriellt eller parallellt.

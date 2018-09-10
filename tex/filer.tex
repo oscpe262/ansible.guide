@@ -31,7 +31,7 @@ kopplar ihop IP-adresser till dessa grupperingar. Vi skulle lika gärna kunna an
 skulle vi ha ännu fler noder skulle vi kunna fortsätta lista dessa under grupperingarna. För att demonstrera detta
 listar vi även ett subset inaktiva (utkommenterade) clients som inte är aktuella än.
 
-Värt att notera är även att vi kan använda ranges (:). I det här fallet har vi gett ett spann IP-adresser, men skulle vi ha använt oss utav domännamn skulle vi även ha kunnat använda oss av ranges i dessa, exempelvis \texttt{client-[1:2]}
+Värt att notera är även att vi kan använda ranges (-). I det här fallet har vi gett ett spann IP-adresser, men skulle vi ha använt oss utav domännamn skulle vi även ha kunnat använda oss av ranges i dessa, exempelvis \texttt{client-[1-2]}. Även \texttt{:} kan användas som \texttt{OR}.
 
 \lstset{language=sh}
 \begin{lstlisting}[frame=single]
@@ -47,8 +47,8 @@ Värt att notera är även att vi kan använda ranges (:). I det här fallet har
 192.168.0.2
 
 [clients]
-192.168.0.[3:4]
-#192.168.1.[1:50]
+192.168.0.[3-4]
+#192.168.1.[1-50]
 
 ## Groupings
 

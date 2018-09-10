@@ -78,4 +78,18 @@ om möjligt oberoende av distribution (eller med stöd för alla berörda distri
 \texttt{playbooks} är den mapp där vi generellt lagrar de playbooks vi skriver. En playbook kan vara hur begränsad
 eller omfattande man önskar, men generellt bör de vara begränsade antingen i funktion eller gruppering av noder.
 Kan man inte på mindre än en minut få en god överblick över vad en playbook gör bör man fundera på hur man kan
-bryta ner den i mindre.
+bryta ner den i mindre. Den här katalogen är inte ett måste, och har man endast ett fåtal playbooks kan det 
+vara smidigare att bara ha dem i rotkatalogen.
+
+\section{Övriga tumregler}
+Ge alltid tasks namn. Det går att utelämna \texttt{name}, men en enkel beskrivning av vad varje task gör ökar 
+läsbarheten och gör det lättare att följa med i vad som görs vid körning.
+
+Keep it simple. Gör det enkelt för dig. Har du endast Ubuntu i din miljö och alla noder på samma version, ja då 
+är det bara onödigt jobb att implementera stöd för RHEL eller Slackware. Det kan implementeras senare vid behov.
+Använd inte heller \texttt{command}- och \texttt{shell}-modulerna för att göra saker det finns moduler för, såvida
+inte det är en enkel rad som kan göras idempotent utan alltför mycket arbete och du inte känner till existerande
+modul för det.
+
+Kommentera och dokumentera. Fördelen med att använda den här typen av verktyg är att man tar bort mycket av det 
+"dagliga pillandet", vilket även gör att det kan gå lång tid mellan det att man redigerar roller, playbooks etc. 

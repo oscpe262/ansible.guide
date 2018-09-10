@@ -1,0 +1,94 @@
+En playbook skrivs i YAML-format. Låt inte detta avskräcka om du aldrig skrivit en rad YAML tidigare, för det är
+rätt så lätt att lära sig. Det som är viktigt att komma ihåg är att indentering spelar roll. Det spelar ingen roll 
+om du använder mellanslag eller tabbar, men "nivåerna" spelar roll.
+
+En playbook innehåller ``plays'' (den som är bekant med amerikansk fotboll känner igen termerna). 
+En play är en mappning av ``tasks'' som skall utföras på en grupp hostar i syfte att nå ett bestämt och känt state.
+
+Vi börjar med ett litet exempel:
+
+\begin{verbatim}
+---
+- hosts: all
+  tasks:
+    - name: "Ensure NTP package is installed"
+      package:
+        name: ntp
+        state: present
+      notify:
+        - restart ntp
+
+  handlers:
+    - name: restart ntp
+      service:
+        name: ntpd
+        state: restarted
+...
+\end{verbatim}
+
+Vi börjar här med en filstart \texttt{---} följt av att vi bestämmer att påföljande tasks skall köras på \texttt{all}, vilket är ett nyckelord och inkluderar samtliga noder i inventoryt. Även \texttt{*} kan användas, och kan användas som wildcard i exempelvis IP-adresser. Vi kan även ange en specifik host eller gruppering. Skulle vi vilja exkludera går även det att göra, precis som vi kan göra en host required, exempelvis:
+
+\verb+webservers:!{{excluded}}:&{{required}}+
+
+Rad tre påbörjar en lista med tasks, och på rad fyra börjar den första (och enda) genom att vi ger den ett \texttt{name}.
+Detta är inget som behövs, som tidigare nämnts, men det bör ges. Därefter säger vi att vi skall använda modulen 
+\texttt{package} för att säkerställa att paketet \texttt{ntp} är installerat (\texttt{present}). Om denna task körs
+och åstadkommer någon förändring på systemet (i det här fallet, installeras) så säger vi till Ansible att anropa en
+handler (\texttt{notify}).
+
+Sedan har vi själv handlern, vilket i princip är en task, men den körs endast en gång per play, och endast om den 
+anropats till följd av en notify. Hade vi haft en task till som exempelvis justerat en konfigurationsfil med samma notify så hade denna handler körs en (1) gång, även om vi både installerat paketet och justerat konfigurationsfilen, men inte körts om vi direkt efter kört samma playbook en gång till eftersom paketet då varit installerat och konfigurationsfilen varit oförändrad.
+
+Handlern \texttt{restart ntp} i det här fallet använder modulen \texttt{service} för att starta om tjänsten \texttt{ntpd}. Kort om \texttt{service}-modulen kan nämnas att den stödjer de flesta system för daemons som används idag.
+
+Om du inte riktigt greppat konceptet med moduler så är det inget att oroa sig för. Vi kommer att gå in djupare på det vad det lider.
+
+\section{Användare}
+Att hålla koll på vilken användare som används på styrenheten likväl som hostarna är ett måste. Vi kan inte anta att
+alla som ska köra en playbook har root-access eller ens bör ha. Samtidigt kommer många saker att kräva förhöjda 
+rättigheter för att utföras. Likaså kanske inte det konto som används på styrenheten ens finns på (alla) hostarna.
+
+Vi nämnde \texttt{remote\_user} i config-filen tidigare, vilket möjliggör att vi exempelvis kan sätta \texttt{root}
+som ``default'', men det är inte alltid att föredra det heller. Best practice vore i stället att ha ett lokalt 
+servicekonto på varje nod -- låt oss kalla det för \texttt{ansacc} (kort för ansible account) -- med ssh-nyckel.
+Detta servicekonto ges sedan sudorättigheter att bli \texttt{root} (företrädesvis med lösenord vilket sparas i en
+vault-fil, men det är överkurs). Därefter kan vi använda oss utav \texttt{become: yes} för att eskalera rättigheterna där det behövs.
+
+\begin{verbatim}
+---
+- hosts: all
+  become: yes
+  tasks:
+    [...]
+...
+\end{verbatim}
+
+\section{Taggar}
+Inte sällan tar det tid att köra långa plays, inte minst när vi börjar jobba med roles, och då är det onödigt att
+behöva mata genom hela batteriet om vi bara vill ändra en enskild sak. Då blir det lätt att man undviker 
+konfigurationsstyrning och sedan faller hela poängen. Därför är taggar bra att använda i tasks för att på så sätt
+kunna begränsa de tasks som ska köras i en playbook. Så för att kunna urskilja NTP-relaterade prylar genom vårat 
+grundläggande körexempel tidigare ger vi vår playbook taggen NTP:
+
+\begin{verbatim}
+---
+- hosts: all
+  tasks:
+    - name: "Ensure NTP package is installed"
+      package:
+        name: ntp
+        state: present
+      tags: NTP
+      notify:
+        - restart ntp
+
+  handlers:
+    - name: restart ntp
+      service:
+        name: ntpd
+        state: restarted
+      tags: NTP
+...
+\end{verbatim}
+
+Varje task kan ges flera taggar i en kommaseparerad lista (OR:ad, så en räcker för att aktivera).
