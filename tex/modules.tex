@@ -6,4 +6,51 @@ Ansible har oftast en eller flera tabbar med dokumentation för olika moduler up
 Dokumentationen finns där av en anledning -- att användas. Att memorera annat än namnen på de allra vanligaste är
 ett slöseri med tid i de flesta fall.
 
-To be continued ...
+Varje modulsektion nedan kommer med ett mer eller mindre grundläggande exempel. I de fall det är mer än minimala
+exempel så beror det på att jag antingen vill belysa en kraftfull användning av modulen eller att jag vill introducera något koncept.
+
+\section{package}
+Packagemodulen används för att installera paket med pakethanterare. De flesta pakethanterare har en egen modul som
+är betydligt kraftfullare än \texttt{package}, men i nio av tio fall räcker denna modul mer än väl. Fördelen är att
+vi inte behöver fundera på om systemet använder dpkg, yum, pacman eller whatever, vi behöver bara bry oss om vad 
+paketet vi vill hantera heter. Ofta har paket samma namn mellan distar, men det kan skilja sig åt och då behöver
+man täcka upp för det (se många av mina ansible-role-repon för exempel på detta). Betänk att pakethanterare ofta
+behöver root-privilegier.
+
+Modulen har och behöver två parametrar:
+\texttt{name} ger namnet på det paket som ska hanteras.
+
+\texttt{state} bestämmer om paketet i fråga ska vara installerat (\texttt{present}) eller inte (\texttt{absent}). De
+flesta underliggande moduler stödjer även (\texttt{latest}).
+
+\begin{verbatim}
+- name: Install SELINUX libs if needed
+  when: ansible_selinux and ansible_selinux.status == 'enabled'
+  become: True
+  package:
+    name: "{{ item }}"
+  with_items:
+    - libselinux-python
+    - policycoreutils-python
+\end{verbatim}
+
+
+\section{template}
+Vi kommer att titta närmare på hur vi bygger templates senare, men till en början ska vi se hur vi använder modulen.
+
+
+\section{service}
+
+\section{shell}
+
+\section{command}
+
+\section{file}
+
+\section{lineinfile}
+
+\section{stat}
+
+\section{group}
+
+\section{user}
