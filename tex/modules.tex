@@ -38,12 +38,84 @@ flesta underliggande moduler stödjer även (\texttt{latest}).
 \section{template}
 Vi kommer att titta närmare på hur vi bygger templates senare, men till en början ska vi se hur vi använder modulen.
 
+\begin{verbatim}
+- name: configure ntp (ntpd)
+  when: ( ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6') or
+        systemd_ntpd.stat.islnk is defined
+  notify: restart ntp
+  become: true
+  template:
+    src: "ntp.conf_{{ ansible_os_family }}{{ ansible_distribution_major_version }}.j2"
+    dest: /etc/ntp.conf
+  tags: NTP
+\end{verbatim}
+
+Det här är en task som bjuder på lite variabelanvändning (bara för demonstration av variabler samt konditionell 
+användning, så \texttt{when}-delen är inte relevant för modulen i sig). Men, om vi ser till de modulrelevanta 
+raderna så ser vi följande:
+
+\begin{verbatim}
+- name: configure ntp (ntpd)
+  template:
+    src: "ntp.conf.j2"
+    dest: /etc/ntp.conf
+\end{verbatim}
+
+Vi har en template, \texttt{templates/ntp.conf.j2} på styrsystemet som vi använder för att konfigurera \texttt{/etc/ntp.conf} på noderna. Exemplet ovan är minimalt, men det finns fler användbara parametrar:
+
+\texttt{backup: yes} skapar en backupfil med timestamp så att du kan återställa originalet om det skulle behövas.
+
+\texttt{validate} erbjuder möjligheten att validera den nya filen med valt kommando innan vi skriver över den gamla.
+Sökvägen skickas som \verb+%s+ (se exempel nedan).
+
+Det kan även vara bra att känna till några andra parametrar, nämligen de som styr filrättigheter:
+
+\texttt{owner} anger vilken user som ska ha rättigheter (per default är det den användare som ansible använder, d.v.s. den man ansluter som eller den man eleverar sig till (\texttt{root} i fallet \texttt{become: yes})).
+
+\texttt{group} är som \texttt{owner} men för group.
+
+\texttt{mode} agerar chmod, men har lite egenheter. Den accepterar symbolic mode (ex. \texttt{u+rwx}) och även
+oktetter. Använder vi oss av en oktala värden behöver modulen dock veta det genom att vi inleder med 0, alternativt
+sätter det inom enkla citattecken, ex. \texttt{0644, 01777} eller \texttt{'644'}. Vi kan även skicka \texttt{preserve} för att bibehålla befintliga rättigheter (endast Ansible 2.6 eller senare.)
+
+Exempel:
+\begin{verbatim}
+- name: "Update sshd config safely to avoid locking yourself out."
+  template:
+    src: etc/ssh/sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0600'
+    validate: /usr/sbin/sshd -t -f %s
+    backup: yes
+\end{verbatim}
 
 \section{service}
+Den här modulen har vi sprungit på tidigare, och den stödjer BSD init, OpenRC, SysV, Solaris SMF, systemd och upstart. De viktigaste parametrarna är:
 
-\section{shell}
+\texttt{name} - obligatorisk.
 
-\section{command}
+\texttt{enabled} - huruvida servicen skall autostarta. Boolean \texttt{yes/no}. Obligatorisk om inte \texttt{state} anges.
+
+\texttt{state} - obligatorisk om inte \texttt{enabled} anges. De båda är inte exklusiva och påverkar inte varandra,
+men endera eller båda krävs. Tar argumenten \verb+reloaded/restarted/running/started/stopped+, där de sista två är idempotenta och körs inte om de inte behövs. Märk väl att \verb+reloaded+ kommer att starta servicen om den inte 
+är startad redan, oavsett vad init-systemet i fråga gör i vanliga fall.
+
+\section{shell/command}
+De här modulerna är i stort sett identiska, men \texttt{shell} kör kommandot i ett eget skall (\texttt{/bin/sh}) på 
+aktuell nod. Generellt sett bör \texttt{command} användas.
+
+Modulerna tar in kommandoraden som skall köras direkt efter modulcallen, och oftast vill vi ta ut ett resultat från 
+körningen, vilket vi gör genom att tilldela tasken en registrerad variabel:
+
+\begin{verbatim}
+- name: return motd to registered variable
+  command: cat /etc/motd
+  register: mymotd
+\end{verbatim}
+
+Parametrar vi vanligen vill använda är \texttt{creates/removes} samt \texttt{chdir}. Sistnämnda ändrar directory alldeles innan kommandot körs, och de förstnämnda kollar huruvida given path existerar, och om den gör/inte gör det så körs kommandot. Att sätta parametern tar inte bort eller skapar filerna i sig, utan utgår från att kommandot skapar dessa.
 
 \section{file}
 
