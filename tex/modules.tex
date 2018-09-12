@@ -118,8 +118,24 @@ körningen, vilket vi gör genom att tilldela tasken en registrerad variabel:
 Parametrar vi vanligen vill använda är \texttt{creates/removes} samt \texttt{chdir}. Sistnämnda ändrar directory alldeles innan kommandot körs, och de förstnämnda kollar huruvida given path existerar, och om den gör/inte gör det så körs kommandot. Att sätta parametern tar inte bort eller skapar filerna i sig, utan utgår från att kommandot skapar dessa.
 
 \section{file}
+Den här modulen kan skapa filer, kataloger, länkar, modifiera alla dessas rättigheter.
+Den enda parameter som är obligatorisk är \texttt{path}, vilket givetvis avser sökvägen på aktuell nod.
+
+Parametrarna \verb?owner, group, mode? fungerar som i \texttt{template}, och \texttt{recurse} applicerar rekursivt när en katalog är utpekad.
+
+\texttt{src} kan användas för att skapa länkar (endast med \texttt{state=link} och \texttt{state=hard}) och tar då sökvägen till den fil vi vill länka till.
+
+\texttt{state} är oftast med, även om det inte är ett krav (exempelvis kanske vi är säkra på att filen finns, men vi
+vill endast modifiera ägarskapet). Det skadar dock oftast inte att ha den med även om vi vet att filen finns.
+\texttt{state} tar ett av sex argument vilka bör vara självförklarande om vi vet hur länkar fungerar, kommandot 
+\texttt{touch} fungerar och att en katalog är en fil (men en särskild sorts fil). Argumenten är då:
+\verb=absent,directory,file,hard,link,touch= där \texttt{file} är implicit. Värt att notera är att \texttt{directory} kommer att skapa alla kataloger i pathen (jmf. \texttt{mkdir -p}).
 
 \section{lineinfile}
+Det här är en väldigt kraftfull men svårhanterad modul, tillsammans med dess systermodul \texttt{blockinfile}. Jag tänker inte försöka sammanfatta hur den används, men den förutsätter att användaren är i någon utsträckning bekant
+med regex, och kan användas för att sätta eller ta bort rader i en textfil. Läs på i dokumentationen ordentligt och testa på någon testfil innan du kör den live.
+
+\section{ini_file}
 
 \section{stat}
 
