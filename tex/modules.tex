@@ -131,14 +131,116 @@ vill endast modifiera ägarskapet). Det skadar dock oftast inte att ha den med �
 \texttt{touch} fungerar och att en katalog är en fil (men en särskild sorts fil). Argumenten är då:
 \verb=absent,directory,file,hard,link,touch= där \texttt{file} är implicit. Värt att notera är att \texttt{directory} kommer att skapa alla kataloger i pathen (jmf. \texttt{mkdir -p}).
 
+Det finns gott om exempel på modulens dokumentationssida, och då det är en modul med många funktioner så besparar vi
+oss exempel här.
+
 \section{lineinfile}
 Det här är en väldigt kraftfull men svårhanterad modul, tillsammans med dess systermodul \texttt{blockinfile}. Jag tänker inte försöka sammanfatta hur den används, men den förutsätter att användaren är i någon utsträckning bekant
 med regex, och kan användas för att sätta eller ta bort rader i en textfil. Läs på i dokumentationen ordentligt och testa på någon testfil innan du kör den live.
+Det är även viktigt att tänka till lite extra då man väldigt lätt kan komma att bryta idempotens om man gör fel.
 
-\section{ini_file}
+\section{ini\_file}
+\texttt{ini\_file} är en modul undertecknad i skrivande stund inte testat själv ännu då den sprangs på först vid
+skrivandet av denna guide. Den verkar dock vara en väldigt smidig modul som kan göra mycket av det jobb som annars
+utförst med \texttt{template} eller \texttt{lineinfile}. Den tar dock endast INI-style-filer, men har man några 
+sådana som ska redigeras på enstaka punkter kan det vara värt att ta en titt på den här modulen.
 
 \section{stat}
+Konditionella tasks gör Ansible så mycket kraftfullare, och även om många moduler har vissa kontrollfunktioner så
+finns det ofta andra saker vi vill testa och information att inhämta. Modulen \texttt{stat} är ofta ett utmärkt verktyg för detta. Den inhämtar fakta inte helt olikt kommandot med samma namn. Vi kan inhämta attribut, checksums och 
+mime-type, ägarskap etc., men framför allt kan vi se om filer finns, utan att nödvändigtvis skapa dem ifall de inte finns.
 
-\section{group}
+För det mesta vill vi använda den med en registrerad variabel och sedan nyttja den i sin tur. Vi tar ett exempel:
 
-\section{user}
+\begin{verbatim}
+- stat:
+    /etc/foo
+  register: etcfoo
+
+- fail:
+    msg: "Whoops, file ownership has changed!"
+  when: etcfoo.stat.pw_name != 'root'
+\end{verbatim}
+
+En komplett lista på returvärden återfinns i sedvanlig ordning i modulens dokumentation.
+
+\section{group/user}
+När det kommer till användarhantering så är det givetvis inte att föredra att ha en massa lokala konton på alla 
+maskiner, särskilt inte om man har många. Då är en modern central autentiseringslösning såsom LDAP eller AD att
+föredra. NIS är aldrig att föredra, förutom i syfte att bli klar med den labben i TDDI41 snabbt. NIS är som sagt
+osäkert och förlegat, men hänger tyvärr kvar i den verkliga världen på många ställen, så det är givetvis bra att
+ha stiftat bekantskap med det. NIS grundar sig även i de lokala kontona på NIS-servern by default, och som vi
+nämnde i början kan det vara bra att ha enskilda administrationskonton lokalt, och då vill vi gärna ha dem identiska. Enter: modulerna \texttt{group} och \texttt{user}.
+
+Generellt vill vi köra \texttt{group} före \texttt{user}, då vi oftast vill lägga till användare i grupper, och då
+gäller det att gruppen finns. Är man inte bekant med de vanliga kommandona \verb=useradd/usermod/groupadd/groupmod= 
+bör man ta en titt på dem och testa dessa innan man går vidare med att använda dessa moduler, detta för att få en
+grundläggande förståelse om hur lokala konton fungerar.
+
+\texttt{group} tar några få parametrar: \texttt{name} för gruppnamn (obligatorisk), \texttt{gid} för att sätta 
+bestämd GID, \texttt{local} (2.6 eller senare) för att göra ändringarna lokalt om miljön har en central aut-lösning 
+som använder groupadd, \texttt{state: present/absent} för att avgöra om gruppen ska finnas eller inte, samt 
+\texttt{system: no/yes} för huruvida gruppen är en systemgrupp.
+
+\texttt{user} tar desto fler parametrar, och jag rekommenderar att läsa dokumentationen för dessa. Jag bifogar dock
+ett exempel nedan på en i stort sett full tasklist för att skapa en ansible-användare (\texttt{ansacc}) i gruppen 
+\texttt{ansible}, där vi lägger till en förskapad public key för SSH och ger den sudorättigheter. Vi använder vissa
+variabler vars deklaration vi här utelämnat:
+\newpage
+
+\begin{verbatim}
+- name: "Create Local Ansible Group"
+  become: yes
+  group:
+    name: ansible
+    gid: '{{ ansible_gid }}'
+    state: present
+
+- name: "Setup Local User Account: ansacc"
+  become: yes
+  user:
+    name: ansacc
+    group: ansible
+    comment: Ansible Service Account
+    shell: '{{ ansible_shell }}'
+    home: '{{ ansible_user_home }}'
+    move_home: yes
+    uid: '{{ ansible_uid }}'
+
+- name: Create ansacc Home Directory
+  become: yes
+  file:
+    path: '{{ ansible_user_home }}'
+    state: directory
+    mode: 0755
+    owner: ansacc
+    group: ansible
+
+- name: Create ansacc SSH Directory
+  become: yes
+  file:
+    path: '{{ ansible_user_home }}/.ssh'
+    state: directory
+    mode: 0700
+    owner: ansacc
+    group: ansible
+
+- name: Copy Public SSH Key to authorized_keys
+  become: yes
+  copy:
+    src: /home/ansible/.ssh/id_rsa.pub
+    dest: '{{ ansible_user_home }}/.ssh/authorized_keys'
+    mode: 0600
+    owner: ansacc
+    group: ansible
+
+- name: Add ansible user to sudoers
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    line: "ansible ALL=(ALL) NOPASSWD: ALL"
+    state: present
+    validate: 'visudo -cf %s'
+\end{verbatim}
+
+
