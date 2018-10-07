@@ -46,7 +46,7 @@ lära dig och förstå vad som ska göras -- men det besparar dig en massa scrip
 \subsection{Vad är Ansible?}
 Ansible är en öppen mjukvara för automatisering av bland annat mjukvaruprovisionering och konfigurationsstyrning. Ansible ansluter via SSH (eller PowerShell, eller andra API:er, men jag lägger här fokus vid styrning från och till linuxmaskiner) till en eller flera noder -- seriellt eller parallellt.
 
-Det som skiljer Ansible från exempelvis Chef eller Puppet är att Ansible är agentlös. Alla ändringar pushas ut till noderna. Det går att göra hooks, inte minst via Ansible Tower (licensmjukvara), men det är inget som kommer att beröras här.
+Det som skiljer Ansible från exempelvis SaltStack, Chef eller Puppet är att Ansible är agentlös. Alla ändringar pushas ut till noderna (i likhet med SaltStack, men i motsats till Chef och Puppet). Det går att göra hooks, inte minst via Ansible Tower (licensmjukvara), men det är inget som kommer att beröras här.
 
 \subsection{Vad tjänar jag på att använda Ansible?}
 Tid och läsbarhet. Tack vare att Ansible skeppas med transparenta moduler så är det lätt att följa YAML-koden över vad varje playbook eller role gör. 
